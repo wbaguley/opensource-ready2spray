@@ -2,7 +2,7 @@
   "name": "ready2spray",
   "version": "1.0.0",
   "type": "module",
-  "license": "MIT",
+  "license": "Elastic-2.0",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=10.0.0"

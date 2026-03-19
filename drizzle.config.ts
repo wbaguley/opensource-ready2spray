@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 
 // Use DATABASE_URL from .env or fallback to local PostgreSQL
-const connectionString = process.env.DATABASE_URL || "postgresql://gtm_dev:Claude_Code_Rules2026@localhost:5432/Ready2Spray";
+const connectionString = process.env.DATABASE_URL || "postgresql://ready2spray:ready2spray_local_2024@localhost:5432/ready2spray";
 
 export default defineConfig({
   schema: "./drizzle/schema.ts",

@@ -68,6 +68,9 @@ COPY --from=builder /app/dist ./dist
 # Copy shared directory (may contain runtime files)
 COPY --from=builder /app/shared ./shared
 
+# Copy drizzle migrations (needed for auto-migration on startup)
+COPY --from=builder /app/drizzle ./drizzle
+
 # Set ownership
 RUN chown -R nodejs:nodejs /app
 

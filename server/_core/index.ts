@@ -38,7 +38,36 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+async function runMigrations() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.warn('[Server] No DATABASE_URL set, skipping migrations');
+    return;
+  }
+  try {
+    const { drizzle } = await import('drizzle-orm/postgres-js');
+    const { migrate } = await import('drizzle-orm/postgres-js/migrator');
+    const postgres = (await import('postgres')).default;
+    const isLocalhost = connectionString.includes('localhost') || connectionString.includes('db:');
+    const client = postgres(connectionString, {
+      ssl: isLocalhost ? false : { rejectUnauthorized: false },
+      max: 1,
+    });
+    const db = drizzle(client);
+    console.log('[Server] Running database migrations...');
+    await migrate(db, { migrationsFolder: './drizzle' });
+    console.log('[Server] Migrations complete');
+    await client.end();
+  } catch (error) {
+    console.error('[Server] Migration failed:', error);
+    throw error;
+  }
+}
+
 async function startServer() {
+  // Run database migrations before starting the server
+  await runMigrations();
+
   const expressModule = await import('express');
   const express = (expressModule as any).default || expressModule;
   const app = express();
@@ -50,11 +79,12 @@ async function startServer() {
     contentSecurityPolicy: isDev ? false : {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-        fontSrc: ["'self'", "https:", "data:"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https:"],
+        scriptSrc: ["'self'", "'unsafe-eval'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https:", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        connectSrc: ["'self'", "https:", "https://maps.googleapis.com"],
+        frameSrc: ["'self'", "https://maps.googleapis.com"],
       },
     },
   }));
@@ -64,7 +94,7 @@ async function startServer() {
   // Prod: 100 req/15min
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDev ? 1000 : 100,
+    max: isDev ? 1000 : 500,
     message: 'Too many requests from this IP, please try again later.'
   });
   app.use('/api/', limiter);
