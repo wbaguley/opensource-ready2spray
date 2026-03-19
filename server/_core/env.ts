@@ -18,7 +18,7 @@ export const ENV = {
   llmProvider: (process.env.LLM_PROVIDER ?? "ollama") as "ollama" | "anthropic" | "forge",
   // Ollama Configuration (for local model testing)
   ollamaUrl: process.env.OLLAMA_URL ?? "http://localhost:11434",
-  ollamaModel: process.env.OLLAMA_MODEL ?? "qwen2.5:3b",
+  ollamaModel: process.env.OLLAMA_MODEL ?? "qwen3.5:4b",
   // Anthropic Configuration
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
   anthropicModel: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-20250514",

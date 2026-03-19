@@ -33,7 +33,7 @@ That's it. The setup script handles everything: database, AI model, and the appl
 | Service | Purpose | Port |
 |---------|---------|------|
 | PostgreSQL 16 | Database | 5432 |
-| Ollama + Qwen 2.5 | Local AI (no API key needed) | 11434 |
+| Ollama + Qwen 3.5 | Local AI (no API key needed) | 11434 |
 | Ready2Spray App | Web application | 3000 |
 
 All services run in Docker containers. Nothing is installed on your host system.
@@ -63,7 +63,7 @@ Configure all integrations through **Settings > Integrations** in the app.
 | Frontend | React 19, Vite 7, TypeScript, Tailwind CSS 4, Radix UI |
 | Backend | Node.js 20, Express, tRPC 11, Drizzle ORM |
 | Database | PostgreSQL 16 |
-| AI | Ollama + Qwen 2.5 (local), Anthropic Claude (optional) |
+| AI | Ollama + Qwen 3.5 (local), Anthropic Claude (optional) |
 | Containerization | Docker + Docker Compose |
 
 ## Project Structure

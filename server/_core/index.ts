@@ -76,17 +76,9 @@ async function startServer() {
   // Security middleware - relax CSP in development for Vite HMR inline scripts
   const isDev = process.env.NODE_ENV === 'development';
   app.use(helmet({
-    contentSecurityPolicy: isDev ? false : {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-eval'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https:", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:", "https://maps.googleapis.com", "https://maps.gstatic.com"],
-        connectSrc: ["'self'", "https:", "https://maps.googleapis.com"],
-        frameSrc: ["'self'", "https://maps.googleapis.com"],
-      },
-    },
+    // Disable CSP — this is a self-hosted local application, not a public SaaS.
+    // CSP conflicts with Vite's module scripts and Google Maps integration.
+    contentSecurityPolicy: false,
   }));
   
   // Rate limiting for API endpoints
