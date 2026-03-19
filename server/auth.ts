@@ -38,7 +38,8 @@ export async function registerUser(email: string, password: string, name: string
     name,
     passwordHash,
     loginMethod: "email",
-    role: "user",
+    role: "admin",
+    userRole: "admin",
     lastSignedIn: new Date(),
   }).returning();
 

@@ -13,7 +13,8 @@ export default function FlightBoard() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
 
-  const { data: jobs, isLoading } = trpc.jobs.list.useQuery();
+  const { data: jobsResponse, isLoading } = trpc.jobs.list.useQuery();
+  const jobs = jobsResponse?.data ?? [];
   const { data: jobStatuses } = trpc.jobStatuses.list.useQuery();
   const updateJobMutation = trpc.jobs.update.useMutation({
     onSuccess: () => {
@@ -61,9 +62,9 @@ export default function FlightBoard() {
   };
 
   const getStatusColor = (statusId: number | null) => {
-    if (!statusId) return "#gray";
+    if (!statusId) return "#999";
     const status = jobStatuses?.find(s => s.id === statusId);
-    return status?.color || "#gray";
+    return status?.color || "#999";
   };
 
   const getStatusName = (statusId: number | null) => {

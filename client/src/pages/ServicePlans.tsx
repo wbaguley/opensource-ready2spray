@@ -118,7 +118,12 @@ export default function ServicePlans() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!formData.customerId || isNaN(parseInt(formData.customerId))) {
+      toast.error("Please select a customer");
+      return;
+    }
+
     const payload = {
       customerId: parseInt(formData.customerId),
       siteId: formData.siteId ? parseInt(formData.siteId) : undefined,
@@ -153,7 +158,9 @@ export default function ServicePlans() {
       startDate: plan.startDate || "",
       endDate: plan.endDate || "",
       nextServiceDate: plan.nextServiceDate || "",
-      defaultTargetPests: plan.defaultTargetPests ? JSON.parse(plan.defaultTargetPests).join(", ") : "",
+      defaultTargetPests: plan.defaultTargetPests
+        ? (() => { try { const p = Array.isArray(plan.defaultTargetPests) ? plan.defaultTargetPests : JSON.parse(plan.defaultTargetPests); return Array.isArray(p) ? p.join(", ") : ""; } catch { return ""; } })()
+        : "",
       pricePerService: plan.pricePerService || "",
       status: plan.status || "active",
       notes: plan.notes || "",
@@ -239,35 +246,41 @@ export default function ServicePlans() {
 
                 <div>
                   <Label htmlFor="customerId">Customer *</Label>
-                  <Select
-                    value={formData.customerId}
-                    onValueChange={(value) => setFormData({ ...formData, customerId: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers?.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id.toString()}>
-                          {customer.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {customers && customers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      No customers yet. <a href="/customers" className="text-primary underline">Create a customer first</a>.
+                    </p>
+                  ) : (
+                    <Select
+                      value={formData.customerId}
+                      onValueChange={(value) => setFormData({ ...formData, customerId: value })}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select customer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers?.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id.toString()}>
+                            {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
 
                 <div>
                   <Label htmlFor="siteId">Site (Optional)</Label>
                   <Select
                     value={formData.siteId}
-                    onValueChange={(value) => setFormData({ ...formData, siteId: value })}
+                    onValueChange={(value) => setFormData({ ...formData, siteId: value === "none" ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select site" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No specific site</SelectItem>
+                      <SelectItem value="none">No specific site</SelectItem>
                       {sites?.map((site) => (
                         <SelectItem key={site.id} value={site.id.toString()}>
                           {site.name}
@@ -463,13 +476,22 @@ export default function ServicePlans() {
                   )}
                 </div>
 
-                {!!(plan.defaultTargetPests && typeof plan.defaultTargetPests === 'string') && (
+                {!!plan.defaultTargetPests && (
                   <div className="mb-4">
                     <p className="text-sm text-muted-foreground mb-1">Target Pests</p>
                     <div className="flex flex-wrap gap-1">
-                      {(JSON.parse(plan.defaultTargetPests) as string[]).map((pest: string, idx: number) => (
-                        <Badge key={idx} variant="secondary">{pest}</Badge>
-                      ))}
+                      {(() => {
+                        try {
+                          const pests = Array.isArray(plan.defaultTargetPests)
+                            ? plan.defaultTargetPests
+                            : (typeof plan.defaultTargetPests === 'string' ? JSON.parse(plan.defaultTargetPests) : []);
+                          return Array.isArray(pests) ? pests.map((pest: string, idx: number) => (
+                            <Badge key={idx} variant="secondary">{pest}</Badge>
+                          )) : null;
+                        } catch {
+                          return null;
+                        }
+                      })()}
                     </div>
                   </div>
                 )}

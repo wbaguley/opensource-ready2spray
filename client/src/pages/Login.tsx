@@ -128,6 +128,11 @@ export default function Login() {
                 Register
               </a>
             </p>
+
+            <p className="text-center text-xs text-muted-foreground mt-4 border-t pt-4">
+              This is self-hosted software. All data is stored locally on your infrastructure.
+              By signing in you agree to the <a href="/register" className="text-primary underline" onClick={(e) => { e.preventDefault(); setLocation("/register"); }}>Terms of Use</a>.
+            </p>
           </form>
         </CardContent>
       </Card>

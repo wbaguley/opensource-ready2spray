@@ -5,10 +5,11 @@ import { useMemo } from "react";
 
 export default function EquipmentDashboard() {
   const { data: equipment, isLoading: equipmentLoading } = trpc.equipment.list.useQuery();
-  const { data: jobs, isLoading: jobsLoading } = trpc.jobs.list.useQuery();
+  const { data: jobsResponse, isLoading: jobsLoading } = trpc.jobs.list.useQuery();
+  const jobs = jobsResponse?.data ?? [];
 
   const analytics = useMemo(() => {
-    if (!equipment || !jobs) return null;
+    if (!equipment || !jobsResponse) return null;
 
     const totalEquipment = equipment.length;
     const activeEquipment = equipment.filter(e => e.status === 'active').length;

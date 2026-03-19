@@ -35,7 +35,8 @@ export default function Calendar() {
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState(new Date());
 
-  const { data: jobs, isLoading } = trpc.jobs.list.useQuery();
+  const { data: jobsResponse, isLoading } = trpc.jobs.list.useQuery();
+  const jobs = jobsResponse?.data ?? [];
   const { data: customers } = trpc.customers.list.useQuery();
   const { data: personnel } = trpc.personnel.list.useQuery();
   const { data: jobStatuses } = trpc.jobStatuses.list.useQuery();
@@ -68,7 +69,7 @@ export default function Calendar() {
           end: new Date(job.scheduledEnd!),
           resource: {
             ...job,
-            statusColor: status?.color || "#gray",
+            statusColor: status?.color || "#999",
             statusName: status?.name || "Unknown",
           },
         };

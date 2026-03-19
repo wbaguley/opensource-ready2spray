@@ -44,15 +44,16 @@ export default function CustomerPortal() {
     enabled: isLoggedIn && !!customer,
   });
 
-  const { data: jobs } = trpc.jobs.list.useQuery(undefined, {
+  const { data: jobsResponse } = trpc.jobs.list.useQuery(undefined, {
     enabled: isLoggedIn && !!customer,
   });
+  const jobs = jobsResponse?.data ?? [];
 
   const customerServicePlans = servicePlans?.filter(
     (plan) => plan.customerId === customer?.id
   );
 
-  const customerJobs = jobs?.filter((job) => job.customerId === customer?.id);
+  const customerJobs = jobs?.filter((job: any) => job.customerId === customer?.id);
 
   const upcomingJobs = customerJobs
     ?.filter((job) => {

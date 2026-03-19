@@ -85,6 +85,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "edit_user_roles",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
     "view_settings",
     "edit_settings",
   ],
@@ -127,6 +128,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "edit_user_roles",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
     "view_settings",
     "edit_settings",
   ],
@@ -167,6 +169,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "delete_personnel",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
   ],
   technician: [
     // Technicians have full access except Settings and User Management (admin only)
@@ -205,6 +208,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "delete_personnel",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
   ],
   pilot: [
     // Pilots have full access except Settings and User Management (admin only)
@@ -243,6 +247,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "delete_personnel",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
   ],
   sales: [
     // Sales have full access except Settings and User Management (admin only)
@@ -281,6 +286,7 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "delete_personnel",
     "view_ai_chat",
     "view_maps",
+    "view_weather",
   ],
 };
 

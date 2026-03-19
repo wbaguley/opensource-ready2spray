@@ -520,8 +520,9 @@ export const appRouter = router({
   // Job Statuses router
   jobStatuses: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      const { getOrCreateUserOrganization, getJobStatusesByOrgId } = await import("./db");
+      const { getOrCreateUserOrganization, getJobStatusesByOrgId, ensureDefaultJobStatuses } = await import("./db");
       const org = await getOrCreateUserOrganization(ctx.user.id);
+      await ensureDefaultJobStatuses(org.id);
       return await getJobStatusesByOrgId(org.id);
     }),
     create: protectedProcedure
@@ -973,10 +974,10 @@ ${pdfText}`,
       .input((raw: any) => raw)
       .mutation(async ({ ctx, input }) => {
         const { createMessage, getOrCreateUserOrganization, getMessagesByConversationId } = await import("./db");
-        const { getClaudeResponse } = await import("./claude");
-        
+        const { invokeLLM } = await import("./_core/llm");
+
         const org = await getOrCreateUserOrganization(ctx.user.id);
-        
+
         // Save user message
         const userMessage = await createMessage({
           conversationId: input.conversationId,
@@ -991,69 +992,32 @@ ${pdfText}`,
           content: m.content,
         }));
 
-        // Get AI response with MCP tools
+        // Get AI response using multi-provider LLM (respects LLM_PROVIDER env var)
         try {
-          const { mcpTools, executeMCPTool } = await import("./mcpTools");
-          
-          const response = await getClaudeResponse({
-            messages,
-            systemPrompt: `You are a helpful agricultural operations assistant for Ready2Spray. You help with job scheduling, weather conditions, EPA compliance, and agricultural operations.
+          const systemMessage = {
+            role: "system" as const,
+            content: `You are a helpful agricultural operations assistant for Ready2Spray. You help with job scheduling, weather conditions, EPA compliance, and agricultural operations. Be concise and practical.`,
+          };
 
-You have access to tools to query jobs, customers, personnel, weather, and EPA products. Use these tools when users ask about specific data.
-
-Be concise and practical. When presenting data from tools, format it clearly.`,
-            tools: mcpTools,
+          const response = await invokeLLM({
+            messages: [systemMessage, ...messages],
             maxTokens: 2048,
           });
 
           let assistantContent = "";
-          const toolResults: string[] = [];
 
-          // Process response content and handle tool calls
-          for (const block of response.content) {
-            if (block.type === 'text') {
-              assistantContent += block.text;
-            } else if (block.type === 'tool_use') {
-              // Execute the tool
-              const toolResult = await executeMCPTool(
-                block.name,
-                block.input,
-                { organizationId: org.id, userId: ctx.user.id }
-              );
-              toolResults.push(`Tool: ${block.name}\nResult: ${JSON.stringify(toolResult, null, 2)}`);
-              
-              // If tool was used, get follow-up response from Claude with tool results
-              if (response.stopReason === 'tool_use') {
-                const followUpMessages = [
-                  ...messages,
-                  {
-                    role: 'assistant' as const,
-                    content: JSON.stringify(block)
-                  },
-                  {
-                    role: 'user' as const,
-                    content: `Tool result: ${JSON.stringify(toolResult)}`
-                  }
-                ];
-                
-                const followUpResponse = await getClaudeResponse({
-                  messages: followUpMessages,
-                  systemPrompt: `You are a helpful agricultural operations assistant for Ready2Spray. Present the tool results in a clear, user-friendly format.`,
-                  maxTokens: 2048,
-                });
-                
-                for (const followUpBlock of followUpResponse.content) {
-                  if (followUpBlock.type === 'text') {
-                    assistantContent += followUpBlock.text;
-                  }
-                }
-              }
+          if (response.choices && response.choices.length > 0) {
+            const choice = response.choices[0];
+            if (typeof choice.message.content === "string") {
+              assistantContent = choice.message.content;
+            } else if (Array.isArray(choice.message.content)) {
+              assistantContent = choice.message.content
+                .map((part: any) => (part.type === "text" ? part.text : ""))
+                .join("");
             }
           }
 
-          if (!assistantContent && toolResults.length > 0) {
-            assistantContent = toolResults.join('\n\n');
-          } else if (!assistantContent) {
+          if (!assistantContent) {
             assistantContent = "I apologize, but I couldn't generate a response. Please try again.";
           }
 
@@ -1064,8 +1028,8 @@ Be concise and practical. When presenting data from tools, format it clearly.`,
             content: assistantContent,
           });
 
-          return { 
-            userMessage, 
+          return {
+            userMessage,
             assistantMessage,
             usage: response.usage,
           };
@@ -1459,8 +1423,8 @@ Be concise and practical. When presenting data from tools, format it clearly.`,
     processNow: protectedProcedure
       .mutation(async ({ ctx }) => {
         const { user } = ctx;
-        // Only allow admin users to trigger processing
-        if (user.role !== 'admin') {
+        // Only allow admin/owner users to trigger processing
+        if (user.userRole !== 'admin' && user.userRole !== 'owner' && user.role !== 'admin') {
           throw new Error('Only administrators can trigger service plan processing');
         }
         const { triggerServicePlanProcessing } = await import("./servicePlanScheduler");

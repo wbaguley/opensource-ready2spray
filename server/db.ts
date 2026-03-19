@@ -573,10 +573,10 @@ export async function deletePersonnel(id: number) {
 export async function getProductsByOrgId(orgId: number) {
   const db = await getDb();
   if (!db) return [];
-  
-  const { products } = await import("../drizzle/schema");
+
+  const { productsComplete } = await import("../drizzle/schema");
   const { eq } = await import("drizzle-orm");
-  return await db.select().from(products).where(eq(products.orgId, orgId));
+  return await db.select().from(productsComplete).where(eq(productsComplete.orgId, orgId));
 }
 
 export async function getConversationsByOrgId(orgId: number) {

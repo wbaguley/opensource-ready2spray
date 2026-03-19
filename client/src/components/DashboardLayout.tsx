@@ -22,7 +22,7 @@ import {
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { usePermissions, Permission } from "@/hooks/usePermissions";
-import { LayoutDashboard, LogOut, PanelLeft, Users, UserPlus, Briefcase, UserCheck, Package, MessageSquare, MapPin, Settings as SettingsIcon, Plane, CalendarDays, Wrench, BarChart3, CalendarCheck, Pill, Key, Cloud, Brain, Wind, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, LogOut, PanelLeft, Users, UserPlus, Briefcase, UserCheck, Package, MessageSquare, MapPin, Settings as SettingsIcon, Plane, CalendarDays, Wrench, BarChart3, CalendarCheck, Pill, Key, Cloud, Brain, Wind, ClipboardCheck } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -312,20 +312,26 @@ function DashboardLayoutContent({
       </div>
 
       <SidebarInset>
-        {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
-            <div className="flex items-center gap-2">
+        <div className="flex border-b h-14 items-center bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+          <div className="flex items-center gap-2">
+            {isMobile && (
               <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? APP_TITLE}
-                  </span>
-                </div>
-              </div>
-            </div>
+            )}
+            {location !== "/dashboard" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => window.history.back()}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <span className="tracking-tight text-foreground font-medium">
+              {activeMenuItem?.label ?? APP_TITLE}
+            </span>
           </div>
-        )}
+        </div>
         <main className="flex-1 p-4">{children}</main>
       </SidebarInset>
       <FloatingChatWidget />

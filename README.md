@@ -1,21 +1,8 @@
 # Ready2Spray - Open Source
 
-An open-source aerial application and pest control operations management platform. Runs entirely on your machine with local AI — no cloud accounts or API keys required to get started.
+An open-source aerial application and pest control operations management platform. Runs entirely on your machine with local AI — no cloud accounts or API keys required.
 
-## Features
-
-- **Job Management** — Schedule, track, and complete spray operations
-- **Customer Management** — CRM with full customer history
-- **Personnel** — Team members, certifications, and licensing
-- **Equipment** — Aircraft, vehicles, spray rigs with maintenance tracking
-- **Site Mapping** — GPS coordinates, boundary mapping (KML/GeoJSON)
-- **Chemical Products** — EPA registration lookup, active ingredients, REI/PHI compliance
-- **AI Assistant** — Local AI chat powered by Ollama + Qwen (no API keys needed)
-- **Weather** — Spray window recommendations based on real-time conditions
-- **Drift Calculator** — Spray drift risk assessment tool
-- **Pre-Flight Checklists** — Configurable safety checklists for operations
-
-## Quick Start
+## One-Command Install
 
 ```bash
 git clone https://github.com/wbaguley/opensource-ready2spray.git
@@ -24,37 +11,79 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-Open **http://localhost:3000** and click **"Quick Login"** to get started.
+That's it. The script installs everything you need:
 
-That's it. The setup script handles everything: database, AI model, and the application.
+| What | How |
+|------|-----|
+| **Docker** | Installed automatically if not present (Homebrew on macOS, official script on Linux) |
+| **PostgreSQL 16** | Runs in a container on port 5432 |
+| **Ollama + Qwen 3.5** | Local AI model, no API key needed — runs in a container on port 11434 |
+| **Ready2Spray App** | Built and launched on port 3000 |
 
-## What Gets Installed
+When it finishes, open **http://localhost:3000** and click **"Quick Login"**.
 
-| Service | Purpose | Port |
-|---------|---------|------|
-| PostgreSQL 16 | Database | 5432 |
-| Ollama + Qwen 3.5 | Local AI (no API key needed) | 11434 |
-| Ready2Spray App | Web application | 3000 |
+### System Requirements
 
-All services run in Docker containers. Nothing is installed on your host system.
+- **macOS** (Intel or Apple Silicon) or **Linux** (Ubuntu, Debian, Fedora, CentOS, Arch)
+- 4GB+ RAM available
+- ~3GB disk space (app + AI model)
+- Internet connection (first run only, for downloads)
 
-## Requirements
+> **Windows users:** Install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) first, then run the commands above inside your WSL terminal.
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) (includes Docker Compose)
-- 4GB+ RAM available for Docker
-- ~3GB disk space (for app + AI model)
+## Features
+
+- **Job Management** — Schedule, track, and complete spray operations
+- **Flight Board** — Pilot-focused daily job view with status updates
+- **Calendar** — Drag-and-drop scheduling with week/month/day views
+- **Customer Management** — CRM with full customer history
+- **Service Plans** — Recurring service agreements (monthly, quarterly, annual)
+- **Customer Portal** — Self-service portal for your customers
+- **Personnel** — Team members, certifications, and licensing
+- **Equipment** — Aircraft, vehicles, spray rigs with maintenance tracking and utilization dashboard
+- **Site Mapping** — GPS coordinates, boundary mapping (KML/GeoJSON)
+- **Chemical Products** — EPA registration lookup, active ingredients, REI/PHI compliance
+- **AI Assistant** — Local AI chat powered by Ollama + Qwen (no API keys needed)
+- **Weather** — Spray window recommendations based on real-time conditions
+- **Drift Calculator** — Spray drift risk assessment tool
+- **Pre-Flight Checklists** — Configurable safety checklists for operations
+
+## Managing the App
+
+```bash
+# Start (after first-time setup)
+docker compose up -d
+
+# Stop
+docker compose down
+
+# View logs
+docker compose logs -f app      # App logs
+docker compose logs -f ollama   # AI model logs
+docker compose logs -f db       # Database logs
+
+# Reset everything (deletes all data)
+docker compose down -v
+./setup.sh
+
+# Rebuild after pulling updates
+git pull
+docker compose build --no-cache app
+docker compose up -d
+```
 
 ## Optional Integrations
 
-Enhance Ready2Spray with these optional services. See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) for setup guides.
+Enhance Ready2Spray with these optional services (none are required):
 
-| Integration | What It Does | Requires |
-|------------|-------------|----------|
-| Google Maps | Satellite views, geocoding, route planning | Free API key |
-| FieldPulse | Sync customers & jobs with field service platform | FieldPulse account |
-| Zoho CRM | Sync customers & jobs with CRM | Zoho account |
+| Integration | What It Does | Setup |
+|------------|-------------|-------|
+| Google Maps | Satellite views, geocoding, route planning | Add `GOOGLE_MAPS_API_KEY` to `.env` |
+| Anthropic Claude | Cloud AI instead of local Ollama | Set `LLM_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` in `.env` |
+| FieldPulse | Sync customers & jobs with field service platform | Configure in Settings > Integrations |
+| Zoho CRM | Sync customers & jobs with CRM | Configure in Settings > Integrations |
 
-Configure all integrations through **Settings > Integrations** in the app.
+See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) for detailed setup guides.
 
 ## Tech Stack
 
@@ -82,33 +111,14 @@ opensource-ready2spray/
 ├── drizzle/             # Database schema & migrations
 ├── shared/              # Shared types/utilities
 ├── docs/                # Documentation
-│   ├── API.md           # API reference
-│   ├── INTEGRATIONS.md  # Integration setup guides
-│   ├── DEPLOYMENT.md    # Deployment guide
-│   └── ENVIRONMENT.md   # Environment variables
 ├── docker-compose.yml   # Production Docker setup
-├── setup.sh             # One-command setup script
+├── setup.sh             # One-command setup (installs everything)
 └── .env.example         # Environment template
-```
-
-## Configuration
-
-All configuration is done through the `.env` file (auto-generated by `setup.sh`).
-
-See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) for all available variables.
-
-### Using a Cloud AI Provider
-
-To use Anthropic Claude instead of local Ollama, update your `.env`:
-
-```env
-LLM_PROVIDER=anthropic
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 ```
 
 ## Development
 
-For local development without Docker:
+For local development with hot reload:
 
 ```bash
 # Start just the database
@@ -120,23 +130,15 @@ pnpm install
 # Set up database
 pnpm db:push
 
-# Start dev server (hot reload)
+# Start dev server
 pnpm dev
 ```
 
-## Commands
+## Configuration
 
-| Command | Description |
-|---------|-------------|
-| `./setup.sh` | First-time setup (builds everything) |
-| `docker compose up -d` | Start all services |
-| `docker compose down` | Stop all services |
-| `docker compose logs -f` | View all logs |
-| `docker compose logs -f app` | View app logs |
-| `docker compose logs -f ollama` | View AI logs |
-| `pnpm dev` | Development mode (requires local Node.js) |
-| `pnpm test` | Run tests |
-| `pnpm build` | Build for production |
+All configuration is done through the `.env` file (auto-generated by `setup.sh`).
+
+See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) for all available variables.
 
 ## License
 

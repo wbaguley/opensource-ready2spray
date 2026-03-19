@@ -38,14 +38,14 @@ export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
 
   const filteredProducts = products?.filter((product: any) =>
-    product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.epaRegNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brandName?.toLowerCase().includes(searchTerm.toLowerCase())
+    product.nickname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.epaNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getSignalWordColor = (signalWord: string | null) => {
-    if (!signalWord) return "secondary";
-    switch (signalWord.toLowerCase()) {
+  const getSignalWordColor = (labelSignalWord: string | null) => {
+    if (!labelSignalWord) return "secondary";
+    switch (labelSignalWord.toLowerCase()) {
       case "danger":
         return "destructive";
       case "warning":
@@ -103,7 +103,7 @@ export default function Products() {
                   <TableRow>
                     <TableHead>Product Name</TableHead>
                     <TableHead>EPA Reg #</TableHead>
-                    <TableHead>Brand Name</TableHead>
+                    <TableHead>Manufacturer</TableHead>
                     <TableHead>Signal Word</TableHead>
                     <TableHead>REI (hours)</TableHead>
                     <TableHead>PHI (days)</TableHead>
@@ -114,36 +114,36 @@ export default function Products() {
                   {filteredProducts.map((product: any) => (
                     <TableRow key={product.id}>
                       <TableCell className="font-medium">
-                        {product.productName || "—"}
+                        {product.nickname || "—"}
                       </TableCell>
                       <TableCell>
-                        {product.epaRegNumber || "—"}
+                        {product.epaNumber || "—"}
                       </TableCell>
                       <TableCell>
-                        {product.brandName || "—"}
+                        {product.manufacturer || "—"}
                       </TableCell>
                       <TableCell>
-                        {product.signalWord ? (
-                          <Badge variant={getSignalWordColor(product.signalWord)}>
-                            {product.signalWord}
+                        {product.labelSignalWord ? (
+                          <Badge variant={getSignalWordColor(product.labelSignalWord)}>
+                            {product.labelSignalWord}
                           </Badge>
                         ) : (
                           "—"
                         )}
                       </TableCell>
                       <TableCell>
-                        —
+                        {product.hoursReentry || "—"}
                       </TableCell>
                       <TableCell>
-                        —
+                        {product.daysPreharvest || "—"}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {product.labelPdfUrl && (
+                          {product.screenshotUrl && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => window.open(product.labelPdfUrl!, "_blank")}
+                              onClick={() => window.open(product.screenshotUrl!, "_blank")}
                               title="View Label"
                             >
                               <ExternalLink className="h-4 w-4" />
