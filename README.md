@@ -24,7 +24,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-Open **http://localhost:3000** and click **"Demo Login"** to get started.
+Open **http://localhost:3000** and click **"Quick Login"** to get started.
 
 That's it. The setup script handles everything: database, AI model, and the application.
 
